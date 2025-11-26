@@ -1,0 +1,53 @@
+name: "TEST: Concurrency Starter (mock start-release-process)"
+
+on:
+  push:
+    branches: [ 'test-concurrency/**' ]
+  workflow_dispatch:
+
+concurrency:
+  group: test-release-process
+  cancel-in-progress: true
+
+jobs:
+  test-starter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Log start"
+        run: |
+          echo "STARTER WORKFLOW START"
+
+      - name: "Mock work before push (5 seconds)"
+        run: |
+          echo "Mock time before push..."
+          sleep 5
+          echo "Mock before push completed"
+
+      - name: "Push to test-release branch (triggers other workflows)"
+        run: |
+          echo "PUSH START"
+          
+          BRANCH_NAME="test-release/$(date +%Y%m%d%H%M%S)"
+          git config user.email "test@example.com"
+          git config user.name "Test Bot"
+          
+          git checkout -b "$BRANCH_NAME"
+          echo "Test file created at $(date -u)" > dummyFile.txt
+          git add dummyFile.txt
+          git commit -m "Test: trigger release workflows"
+          git push origin "$BRANCH_NAME"
+          
+          echo "PUSH END"
+          echo "Pushed to branch: $BRANCH_NAME"
+
+      - name: "Post-push log 1 (Should this run?)"
+        run: |
+          echo "POST-PUSH STEP 1"
+          echo "If we see this, the workflow was not cancelled after push"
+

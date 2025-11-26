@@ -1,0 +1,36 @@
+name: "TEST: Mock Workflow A (simulates release-prs)"
+
+on:
+  push:
+    branches: [ 'test-release/**' ]
+  workflow_dispatch:
+
+concurrency:
+  group: test-release-process
+  cancel-in-progress: true
+
+jobs:
+  test-workflow-a:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Step 1: Log start"
+        run: |
+          echo "MOCK WORKFLOW A STARTED (simulates release-prs)"
+          echo "Run ID: ${{ github.run_id }}"
+          echo "Triggered by: ${{ github.event_name }}"
+          echo "Branch: ${{ github.ref_name }}"
+
+      - name: "Step 2: Simulate PR creation work (15 seconds)"
+        run: |
+          echo "Workflow A: Starting simulated work..."
+          for i in {1..15}; do
+            echo "Workflow A: Working... second $i of 15"
+            sleep 1
+          done
+          echo "Workflow A: Work completed!"
+
+      - name: "Step 3: Final confirmation"
+        run: |
+          echo "WORKFLOW A COMPLETED"
+          echo "If you see this, Workflow A was NOT cancelled"
+
